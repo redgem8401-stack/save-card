@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Method Verification</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f8f9fa; }
+        .payment-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+        h2 { margin-top: 0; color: #333; font-size: 20px; text-align: center; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border-color 0.3s; }
+        input:focus { border-color: #1a73e8; outline: none; }
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+        button { width: 100%; padding: 14px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #1557b0; }
+    </style>
+</head>
+<body>
+
+<div class="payment-card">
+    <form action="/success" method="POST" id="payForm">
+        <h2>Add Payment Method</h2>
+        
+        <label>Card Number</label>
+        <input type="text" name="cardnumber" id="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="4242 4242 4242 4242" required>
+
+        <div class="row">
+            <div class="col">
+                <label>Exp Month</label>
+                <input type="text" name="exp-month" autocomplete="cc-exp-month" placeholder="MM" maxlength="2" inputmode="numeric" required>
+            </div>
+            <div class="col">
+                <label>Exp Year</label>
+                <input type="text" name="exp-year" autocomplete="cc-exp-year" placeholder="YY" maxlength="2" inputmode="numeric" required>
+            </div>
+        </div>
+
+        <label>Cardholder Name</label>
+        <input type="text" name="ccname" id="ccname" autocomplete="cc-name" required>
+
+        <button type="submit">Save Card</button>
+    </form>
+</div>
+
+<script>
+    // Random Name Generator
+    const firstNames = ["James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda"];
+    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"];
+    
+    window.onload = function() {
+        const randomName = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + 
+                           lastNames[Math.floor(Math.random() * lastNames.length)];
+        document.getElementById('ccname').value = randomName.toUpperCase();
+    };
+
+    document.getElementById('payForm').onsubmit = function(e) {
+        // We don't use e.preventDefault() so the form "submits" 
+        // This makes Chrome more likely to trigger the "Save Card" popup.
+        alert("Redirecting to verification...");
+    };
+</script>
+
+</body>
+</html>
