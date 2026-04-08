@@ -3,63 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Method Verification</title>
+    <title>Secure Payment Portal</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f8f9fa; }
-        .payment-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
-        h2 { margin-top: 0; color: #333; font-size: 20px; text-align: center; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500; }
-        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border-color 0.3s; }
-        input:focus { border-color: #1a73e8; outline: none; }
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
-        button { width: 100%; padding: 14px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        button:hover { background-color: #1557b0; }
+        body { font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 360px; }
+        h2 { margin: 0 0 20px 0; font-size: 18px; color: #1c1e21; text-align: center; }
+        label { display: block; margin-bottom: 5px; font-size: 13px; color: #606770; font-weight: 600; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #dddfe2; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: #1877f2; outline: none; }
+        .expiry-container { display: flex; gap: 10px; }
+        button { width: 100%; padding: 12px; background-color: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 5px; }
+        button:hover { background-color: #166fe5; }
+        .success-msg { color: #28a745; font-size: 14px; text-align: center; display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="payment-card">
-    <form action="/success" method="POST" id="payForm">
-        <h2>Add Payment Method</h2>
+<div class="card">
+    <form id="paymentForm" method="POST" action="javascript:void(0);">
+        <h2>Payment Details</h2>
         
         <label>Card Number</label>
         <input type="text" name="cardnumber" id="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="4242 4242 4242 4242" required>
 
-        <div class="row">
-            <div class="col">
-                <label>Exp Month</label>
-                <input type="text" name="exp-month" autocomplete="cc-exp-month" placeholder="MM" maxlength="2" inputmode="numeric" required>
+        <div class="expiry-container">
+            <div style="flex: 1;">
+                <label>Month</label>
+                <input type="text" name="mm" id="mm" autocomplete="cc-exp-month" placeholder="MM" maxlength="2" required>
             </div>
-            <div class="col">
-                <label>Exp Year</label>
-                <input type="text" name="exp-year" autocomplete="cc-exp-year" placeholder="YY" maxlength="2" inputmode="numeric" required>
+            <div style="flex: 1;">
+                <label>Year</label>
+                <input type="text" name="yy" id="yy" autocomplete="cc-exp-year" placeholder="YY" maxlength="2" required>
             </div>
         </div>
 
         <label>Cardholder Name</label>
-        <input type="text" name="ccname" id="ccname" autocomplete="cc-name" required>
+        <input type="text" name="ccname" id="ccname" autocomplete="cc-name" readonly>
 
-        <button type="submit">Save Card</button>
+        <button type="submit" id="submitBtn">Verify Card</button>
+        <div id="msg" class="success-msg">Success! Card details processed.</div>
     </form>
 </div>
 
 <script>
-    // Random Name Generator
-    const firstNames = ["James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda"];
-    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"];
-    
-    window.onload = function() {
-        const randomName = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + 
-                           lastNames[Math.floor(Math.random() * lastNames.length)];
-        document.getElementById('ccname').value = randomName.toUpperCase();
+    // 1. Tự động tạo tên tiếng Anh ngẫu nhiên khi load trang
+    const names = ["James Wilson", "Robert Smith", "Michael Brown", "David Jones", "William Miller", "Mary Taylor", "Linda Anderson"];
+    window.onload = () => {
+        document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)].toUpperCase();
     };
 
-    document.getElementById('payForm').onsubmit = function(e) {
-        // We don't use e.preventDefault() so the form "submits" 
-        // This makes Chrome more likely to trigger the "Save Card" popup.
-        alert("Redirecting to verification...");
-    };
+    // 2. Xử lý khi bấm nút Submit
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        // Hiển thị thông báo thành công
+        const msg = document.getElementById('msg');
+        msg.style.display = 'block';
+
+        // Xóa (Clear) các ô nhập sau 500ms để Chrome kịp ghi nhận form
+        setTimeout(() => {
+            document.getElementById('cardnumber').value = '';
+            document.getElementById('mm').value = '';
+            document.getElementById('yy').value = '';
+            
+            // Random lại một cái tên mới cho lần nhập sau
+            document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)].toUpperCase();
+            
+            // Ẩn thông báo sau 3 giây
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }, 500);
+    });
 </script>
 
 </body>
