@@ -46,30 +46,37 @@
 </div>
 
 <script>
-    // 1. Tự động tạo tên tiếng Anh ngẫu nhiên khi load trang
     const names = ["James Wilson", "Robert Smith", "Michael Brown", "David Jones", "William Miller", "Mary Taylor", "Linda Anderson"];
-    window.onload = () => {
+    
+    // Hàm tạo tên ngẫu nhiên
+    function setRandomName() {
         document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)].toUpperCase();
-    };
+    }
 
-    // 2. Xử lý khi bấm nút Submit
+    window.onload = setRandomName;
+
     document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        // Hiển thị thông báo thành công
+        // Thông báo cho người dùng
         const msg = document.getElementById('msg');
         msg.style.display = 'block';
+        msg.innerText = "Processing card...";
 
-        // Xóa (Clear) các ô nhập sau 500ms để Chrome kịp ghi nhận form
+        // Tạo độ trễ ngắn để Chrome bắt được dữ liệu
         setTimeout(() => {
-            document.getElementById('cardnumber').value = '';
-            document.getElementById('mm').value = '';
-            document.getElementById('yy').value = '';
+            // 1. Reset form về trạng thái ban đầu
+            document.getElementById('paymentForm').reset();
             
-            // Random lại một cái tên mới cho lần nhập sau
-            document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)].toUpperCase();
+            // 2. Cập nhật lại tên ngẫu nhiên mới cho thẻ tiếp theo
+            setRandomName();
+
+            // 3. Cập nhật thông báo
+            msg.innerText = "Success! You can add another card now.";
             
-            // Ẩn thông báo sau 3 giây
+            // 4. Ẩn thông báo sau vài giây
             setTimeout(() => { msg.style.display = 'none'; }, 3000);
-        }, 500);
+            
+            console.log("Form reset successful - Ready for next card");
+        }, 600); 
     });
 </script>
 
