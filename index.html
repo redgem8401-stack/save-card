@@ -74,7 +74,7 @@
             
             // 4. Ẩn thông báo sau vài giây
             setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            
+            window.history.pushState({}, '', '?t=' + Date.now());
             console.log("Form reset successful - Ready for next card");
         }, 600); 
     });
