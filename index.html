@@ -2,82 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Payment Portal</title>
+    <title>Payment Portal</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 360px; }
-        h2 { margin: 0 0 20px 0; font-size: 18px; color: #1c1e21; text-align: center; }
-        label { display: block; margin-bottom: 5px; font-size: 13px; color: #606770; font-weight: 600; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #dddfe2; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        input:focus { border-color: #1877f2; outline: none; }
-        .expiry-container { display: flex; gap: 10px; }
-        button { width: 100%; padding: 12px; background-color: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 5px; }
-        button:hover { background-color: #166fe5; }
-        .success-msg { color: #28a745; font-size: 14px; text-align: center; display: none; margin-top: 10px; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f7f6; }
+        .box { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 320px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #1a73e8; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .status { color: green; font-size: 12px; text-align: center; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <form id="paymentForm" method="POST" action="javascript:void(0);">
-        <h2>Payment Details</h2>
-        
-        <label>Card Number</label>
-        <input type="text" name="cardnumber" id="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="4242 4242 4242 4242" required>
-
-        <div class="expiry-container">
-            <div style="flex: 1;">
-                <label>Month</label>
-                <input type="text" name="mm" id="mm" autocomplete="cc-exp-month" placeholder="MM" maxlength="2" required>
-            </div>
-            <div style="flex: 1;">
-                <label>Year</label>
-                <input type="text" name="yy" id="yy" autocomplete="cc-exp-year" placeholder="YY" maxlength="2" required>
-            </div>
+<div class="box">
+    <form id="paymentForm" method="POST" action="">
+        <h3 style="text-align:center">Verify Payment</h3>
+        <input type="text" id="cn" name="cardnumber" autocomplete="cc-number" placeholder="Card Number" required>
+        <div style="display:flex; gap:10px">
+            <input type="text" id="em" name="month" autocomplete="cc-exp-month" placeholder="MM" maxlength="2" required>
+            <input type="text" id="ey" name="year" autocomplete="cc-exp-year" placeholder="YY" maxlength="2" required>
         </div>
-
-        <label>Cardholder Name</label>
-        <input type="text" name="ccname" id="ccname" autocomplete="cc-name" readonly>
-
-        <button type="submit" id="submitBtn">Verify Card</button>
-        <div id="msg" class="success-msg">Success! Card details processed.</div>
+        <input type="text" id="ccname" name="ccname" autocomplete="cc-name" readonly>
+        <button type="submit">Verify Now</button>
+        <div id="status" class="status">Success! Next card ready.</div>
     </form>
 </div>
 
 <script>
-    const names = ["James Wilson", "Robert Smith", "Michael Brown", "David Jones", "William Miller", "Mary Taylor", "Linda Anderson"];
-    
-    // Hàm tạo tên ngẫu nhiên
-    function setRandomName() {
-        document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)].toUpperCase();
+    const names = ["JOHN DOE", "ALEX SMITH", "EMILY BROWN", "DAVID CLARK", "SARAH JONES"];
+    const form = document.getElementById('paymentForm');
+
+    function init() {
+        // Random tên và cập nhật action của form bằng một chuỗi ngẫu nhiên
+        document.getElementById('ccname').value = names[Math.floor(Math.random() * names.length)];
+        
+        // MẸO QUAN TRỌNG: Thay đổi action liên tục để Chrome tưởng là gửi đi nơi khác
+        form.action = "?verify_token=" + Math.random().toString(36).substring(7);
     }
 
-    window.onload = setRandomName;
+    window.onload = init;
 
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        // Thông báo cho người dùng
-        const msg = document.getElementById('msg');
-        msg.style.display = 'block';
-        msg.innerText = "Processing card...";
+    form.onsubmit = function(e) {
+        // Không dùng e.preventDefault() hoàn toàn, mà dùng kỹ thuật đánh lừa URL
+        const status = document.getElementById('status');
+        status.style.display = 'block';
 
-        // Tạo độ trễ ngắn để Chrome bắt được dữ liệu
+        // MẸO QUAN TRỌNG: Thay đổi lịch sử trình duyệt mà không load lại trang
+        // Điều này khiến Chrome tin rằng bạn đã chuyển sang một "trang mới"
+        window.history.pushState({}, '', form.action);
+
         setTimeout(() => {
-            // 1. Reset form về trạng thái ban đầu
-            document.getElementById('paymentForm').reset();
+            // Xóa dữ liệu cũ
+            document.getElementById('cn').value = '';
+            document.getElementById('em').value = '';
+            document.getElementById('ey').value = '';
             
-            // 2. Cập nhật lại tên ngẫu nhiên mới cho thẻ tiếp theo
-            setRandomName();
+            // Khởi tạo lại trạng thái mới (tên mới, action mới)
+            init();
+            
+            status.style.display = 'none';
+            alert("Card verified! You can enter the next card.");
+        }, 500);
 
-            // 3. Cập nhật thông báo
-            msg.innerText = "Success! You can add another card now.";
-            
-            // 4. Ẩn thông báo sau vài giây
-            setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            window.history.pushState({}, '', '?t=' + Date.now());
-            console.log("Form reset successful - Ready for next card");
-        }, 600); 
-    });
+        // Trả về false để ngăn trang thực sự tải lại, nhưng popup vẫn hiện do pushState đã chạy
+        return false; 
+    };
 </script>
 
 </body>
